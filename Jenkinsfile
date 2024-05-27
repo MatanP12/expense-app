@@ -17,7 +17,7 @@ pipeline {
 		    steps {
 		        echo "Create image"
 		        sh '''#!/bin/bash
-                    docker compose build
+                    docker-compose build
                     '''
 		    }
 		}
