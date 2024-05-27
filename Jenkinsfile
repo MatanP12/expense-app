@@ -22,13 +22,16 @@ pipeline {
 	stages {
 
         stage('build'){
-            sh '''
-                pip install -f requirments.py
-            '''
+            steps {
+                echo "Here suppose to be a build, but we are using python"
+            }
         }        
 
         stage('Unit tests'){
-            echo "Here are tests that suppose to run in pytests, I don't want to create another Dockerfile for pytests"
+            steps {
+                echo "Here are tests that suppose to run in pytests, I don't want to create another Dockerfile for pytests"
+
+            }
         }
 
 		stage('Package'){
