@@ -26,7 +26,7 @@ pipeline {
             steps {
 		        echo "Do e2e tests"
                 sh '''
-                    docker-compose up
+                    docker-compose up -d
                 '''
 		        sh "./e2e_tests/tests.sh"
                 sh "docker-compose down"
