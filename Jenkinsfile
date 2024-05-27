@@ -16,7 +16,9 @@ pipeline {
 		stage('Package'){
 		    steps {
 		        echo "Create image"
-		        sh "docker compose build"
+		        sh '''#!/bin/bash
+                    docker compose build
+                    '''
 		    }
 		}
 		
