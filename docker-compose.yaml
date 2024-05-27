@@ -1,3 +1,4 @@
+name: expense_app
 services:
   app:
     build:
