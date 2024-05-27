@@ -16,7 +16,7 @@ pipeline {
 		stage('Package'){
 		    steps {
 		        echo "Create image"
-		        sh '''#!/bin/bash
+		        sh '''
                     docker-compose build
                     '''
 		    }
@@ -25,9 +25,11 @@ pipeline {
         stage('E2E tests'){
             steps {
 		        echo "Do e2e tests"
-                sh "docker compose up"
+                sh '''
+                    docker-compose up
+                '''
 		        sh "./e2e_tests/tests.sh"
-                sh "docker compose down"
+                sh "docker-compose down"
             }
         }
 
