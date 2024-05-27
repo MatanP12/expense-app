@@ -21,6 +21,16 @@ pipeline {
 
 	stages {
 
+        stage('build'){
+            sh '''
+                pip install -f requirments.py
+            '''
+        }        
+
+        stage('Unit tests'){
+            echo "Here are tests that suppose to run in pytests, I don't want to create another Dockerfile for pytests"
+        }
+
 		stage('Package'){
 		    steps {
 		        echo "Create image"
@@ -46,12 +56,14 @@ pipeline {
             when { expression { env.BRANCH_NAME == 'main' } }
                 steps{
 					sh """docker tag ${APP_IMAGE_NAME}:latest ${ECR_REGISTRY}:latest"""
-				    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: '1c5d01f6-bff4-4ea1-b664-8d62b39b3d99']]) {
+				    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
                         sh """aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"""
-		        		sh """docker push ${ECR_REGISTRY}:latest"""
                     }
+		        	sh """docker push ${ECR_REGISTRY}:latest"""
+
     		    }
-		}	}
+		    }	
+    }
 
 	post {
 		always {
