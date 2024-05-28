@@ -29,8 +29,7 @@ pipeline {
 
         stage('Unit tests'){
             steps {
-                echo "Here are tests that suppose to run in pytests, I don't want to create another Dockerfile for pytests"
-
+		        sh "./unit_tests/tests.sh"
             }
         }
 
