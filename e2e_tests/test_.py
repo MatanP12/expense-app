@@ -6,10 +6,7 @@ import pytest
 
 @pytest.fixture()
 def address():
-    return 'http://app:5000'
-
-# f'http://{sys.argv[1] if sys.argv[1] else "localhost:5000"}' 
-
+    return 'http://expense_app-app-1:5000'
 
 expenses = [
     {

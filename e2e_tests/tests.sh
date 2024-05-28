@@ -1,2 +1,6 @@
 docker build --tag e2e_tests:latests ./e2e_tests
-docker run --network=expense_app_mongo_network --rm --name e2e_test e2e_tests:latests
+docker network create test_network
+docker network connect test_network expense_app-app-1
+docker run --network=test_network --rm --name e2e_test e2e_tests:latests
+docker network disconnect test_network expense_app-app-1
+docker network rm test_network

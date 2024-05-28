@@ -118,8 +118,25 @@ pipeline {
                 }
             }        
         }    
-    }
     
+        stage('Add new tag'){
+            when {
+                expression {
+                    return BRANCH_NAME == "main"
+                }
+            }
+            steps {
+                sshagent(credentials: ['0c049907-e9ed-49b8-a0ab-496edbf082b9']) {
+                    sh """git tag ${RELEASE_TAG}"""
+                    sh """git push origin ${RELEASE_TAG}"""
+                }
+            }        
+        }            
+    }
+
+
+
+
     post {
 		always {
             cleanWs()
