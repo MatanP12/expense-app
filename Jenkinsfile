@@ -26,7 +26,7 @@ pipeline {
 				script{
                     def last_digit = 0
                     echo "Fetching tags from git"
-                    sshagent(credentials: ['99336589-4c5e-4b61-af8c-b6fe709d54b0']) {
+                    sshagent(credentials: ['0c049907-e9ed-49b8-a0ab-496edbf082b9']) {
                         sh """git fetch --tags"""
                     }
                     def git_tags= sh(script: "git tag -l --sort=-v:refname", returnStdout: true).trim()
@@ -95,7 +95,7 @@ pipeline {
 
         stage('Add new tag'){
             steps {
-                	sshagent(credentials: ['99336589-4c5e-4b61-af8c-b6fe709d54b0']) {
+                	sshagent(credentials: ['0c049907-e9ed-49b8-a0ab-496edbf082b9']) {
                         sh """git tag ${RELEASE_TAG}"""
                         sh """git push origin ${RELEASE_TAG}"""
 					}
