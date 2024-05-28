@@ -20,6 +20,7 @@ pipeline {
 
 	stages {
 
+
 		stage('Fetch tag from remote repository'){
 			steps {
 				script{
@@ -99,12 +100,10 @@ pipeline {
                         sh """git push origin ${RELEASE_TAG}"""
 					}
             }        
-        }
-
-
+        }    
+    }
     
-
-	post {
+    post {
 		always {
             cleanWs()
 		}
