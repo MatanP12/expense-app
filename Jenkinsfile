@@ -22,7 +22,12 @@ pipeline {
 
 
 		stage('Fetch tag from remote repository'){
-			steps {
+            when {
+                expression {
+                    return BRANCH_NAME == "main"
+                }
+            }            
+            steps {
 				script{
                     def last_digit = 0
                     echo "Fetching tags from git"
@@ -68,6 +73,11 @@ pipeline {
 		}
 		
         stage('E2E tests'){
+            when {
+                expression {
+                    return BRANCH_NAME.startsWith("feature/") || BRANCH_NAME == "main"
+                }
+            }            
             steps {
 		        echo "Do e2e tests"
                 sh '''
@@ -80,6 +90,11 @@ pipeline {
 
 
 		stage('Push expense app image to registry'){
+            when {
+                expression {
+                    return BRANCH_NAME == "main"
+                }
+            }            
             steps{
                 sh """docker tag ${APP_IMAGE_NAME}:latest ${ECR_REGISTRY}:${RELEASE_TAG}"""
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
@@ -91,11 +106,16 @@ pipeline {
 		}	
 
         stage('Add new tag'){
+            when {
+                expression {
+                    return BRANCH_NAME == "main"
+                }
+            }
             steps {
-                	sshagent(credentials: ['0c049907-e9ed-49b8-a0ab-496edbf082b9']) {
-                        sh """git tag ${RELEASE_TAG}"""
-                        sh """git push origin ${RELEASE_TAG}"""
-					}
+                sshagent(credentials: ['0c049907-e9ed-49b8-a0ab-496edbf082b9']) {
+                    sh """git tag ${RELEASE_TAG}"""
+                    sh """git push origin ${RELEASE_TAG}"""
+                }
             }        
         }    
     }
