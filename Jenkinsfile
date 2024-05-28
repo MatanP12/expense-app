@@ -20,29 +20,14 @@ pipeline {
 
 	stages {
 
-        stage('build'){
-            steps {
-                echo "Here suppose to be a build, but we are using python"
-            }
-        }        
-
 		stage('Fetch tag from remote repository'){
-
-            when {
-                expression {
-                    BRANCH_NAME.startsWith("release/")
-                }
-            }
-
 			steps {
 				script{
                     def last_digit = 0
-                    def version = BRANCH_NAME.tokenize("/")[1]
                     echo "Fetching tags from git"
                     sshagent(credentials: ['99336589-4c5e-4b61-af8c-b6fe709d54b0']) {
                         sh """git fetch --tags"""
                     }
-                    echo "Check tags for ${version}:"
                     def git_tags= sh(script: "git tag -l --sort=-v:refname", returnStdout: true).trim()
                     echo "Git tags=${git_tags}"
 
@@ -59,6 +44,14 @@ pipeline {
 				}
 			}
 		}
+
+
+        stage('build'){
+            steps {
+                echo "Here suppose to be a build, but we are using python"
+            }
+        }        
+
 
 
         stage('Unit tests'){
@@ -89,17 +82,27 @@ pipeline {
 
 
 		stage('Push expense app image to registry'){
-            when { expression { env.BRANCH_NAME == 'main' } }
-                steps{
-					sh """docker tag ${APP_IMAGE_NAME}:latest ${ECR_REGISTRY}:${RELEASE_TAG}"""
-				    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
-                        sh """aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"""
-                    }
-		        	sh """docker push ${ECR_REGISTRY}:${RELEASE_TAG}"""
+            steps{
+                sh """docker tag ${APP_IMAGE_NAME}:latest ${ECR_REGISTRY}:${RELEASE_TAG}"""
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
+                    sh """aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"""
+                }
+                sh """docker push ${ECR_REGISTRY}:${RELEASE_TAG}"""
 
-    		    }
-		    }	
-    }
+            }
+		}	
+
+        stage('Add new tag'){
+            steps {
+                	sshagent(credentials: ['99336589-4c5e-4b61-af8c-b6fe709d54b0']) {
+                        sh """git tag ${RELEASE_TAG}"""
+                        sh """git push origin ${RELEASE_TAG}"""
+					}
+            }        
+        }
+
+
+    
 
 	post {
 		always {
