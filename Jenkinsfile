@@ -34,14 +34,11 @@ pipeline {
 
                     if(git_tags != "") {
                         last_version = git_tags.tokenize("\n")[0]
-                        last_digit = last_version.tokenize(".")[2].toInteger()
+                        last_version = last_version.tokenize(".")
+                        last_digit = last_version[2].toInteger()
                         last_digit += 1
+                        RELEASE_TAG="${last_version[0]}.${last_version[1]}.${last_Version[2]}"
                     }
-                    new_tag= "${version}.${last_digit}"
-                    echo "New tag!===>${new_tag}"
-                    RELEASE_TAG = new_tag
-                    echo "RELEASE TAG====>${RELEASE_TAG}"
-                    echo "BRANCH=========>${BRANCH_NAME}"
 				}
 			}
 		}
