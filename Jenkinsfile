@@ -37,7 +37,7 @@ pipeline {
                         last_version = last_version.tokenize(".")
                         last_digit = last_version[2].toInteger()
                         last_digit += 1
-                        RELEASE_TAG="${last_version[0]}.${last_version[1]}.${last_Version[2]}"
+                        RELEASE_TAG="${last_version[0]}.${last_version[1]}.${last_digit}"
                     }
 				}
 			}
