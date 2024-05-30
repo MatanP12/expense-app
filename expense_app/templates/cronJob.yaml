@@ -1,0 +1,29 @@
+{{- define "mongo-uri" }}
+    {{- $host := printf "%s-%s-0" $.Release.Name $.Values.mongodb.nameOverride -}}
+    {{- $host = printf "%s.%s-%s.%s.svc.cluster.local" $host $.Release.Name $.Values.mongodb.service.name $.Release.Namespace -}}
+  {{ print $host }}
+{{- end }}
+
+
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronJob.name }}
+spec:
+  schedule: {{ .Values.cronJob.schedule }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: {{ .Values.cronJob.containerName }}
+            image: {{ printf "%s:%s" .Values.cronJob.image.name .Values.cronJob.image.tag }}
+            command:               
+              - "/bin/sh"
+              - "-c"
+              - |
+                mongosh {{ printf "--host %s" (include "mongo-uri" .) }} {{ printf "-u %s" .Values.mongodb.auth.rootUser }} {{ printf "-p %s" .Values.mongodb.auth.rootPassword }} \
+                {{ printf "--eval 'db.%s.%s'" .Values.cronJob.collectionName .Values.cronJob.collectionCommand }}
+
+          restartPolicy: OnFailure
