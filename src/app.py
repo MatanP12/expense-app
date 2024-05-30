@@ -7,7 +7,12 @@ from bson import ObjectId
 
 app = Flask(__name__)
 
-client = MongoClient(os.getenv('MONGODB_URI', 'mongodb://localhost:27017'))
+mongo_username = os.getenv('MONGODB_USERNAME', 'root')
+mongo_password = os.getenv('MONGODB_PASSWORD','example')
+mongo_host = os.getenv('MONGODB_HOST', 'localhost')
+mongo_port = os.getenv('MONGODB_PORT','27017')
+
+client = MongoClient(f'mongodb://{mongo_username}:{mongo_password}@{mongo_host}:{mongo_port}')
 db = client['expense_tracker']
 expenses_collection = db['expenses']
 
