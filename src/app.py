@@ -7,7 +7,7 @@ from bson import ObjectId
 
 app = Flask(__name__)
 
-client = MongoClient(os.getenv('MONGO_URI', 'mongodb://localhost:27017'))
+client = MongoClient(os.getenv('MONGODB_URI', 'mongodb://localhost:27017'))
 db = client['expense_tracker']
 expenses_collection = db['expenses']
 
