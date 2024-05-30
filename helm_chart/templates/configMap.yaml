@@ -1,0 +1,24 @@
+{{- define "mongo" }}
+  {{- $mongoHosts := "" -}}
+  {{- $hosts := "" -}}
+  {{- range $i := until (int $.Values.mongodb.replicaCount) -}}
+    {{- $currHost := printf "%s-%s-%d" $.Release.Name $.Values.mongodb.nameOverride $i -}}
+    {{- $currHost = printf "%s.%s-%s.%s.svc.cluster.local" $currHost $.Release.Name $.Values.mongodb.service.name $.Release.Namespace -}}
+    {{- if $hosts -}}
+      {{- $hosts = printf "%s,%s" $hosts $currHost -}}
+    {{- else -}}
+      {{- $hosts = $currHost -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $mongoHosts = printf "%s%s" $mongoHosts $hosts -}}
+  {{ print $mongoHosts }}
+{{- end }}
+
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMap.name }}
+data:
+  MONGODB_HOST: "{{ include "mongo" .}}"
+  MONGODB_PORT: "{{ .Values.mongodb.containerPort.mongodb }}"

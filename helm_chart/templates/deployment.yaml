@@ -24,12 +24,9 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ .Values.configMap.name }}
-        env:
-          - name: MONGODB_URI
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.secret.name }}
-                key: MONGODB_URI
+          - secretRef:
+              name: {{ .Values.secret.name }}
+
 ---
 apiVersion: v1
 kind: Service

@@ -27,11 +27,9 @@ cronJob:
 
 configMap:
   name: expense-app-conf
-  data:
-    logLevel: info
-    persistance: true
 
 secret:
+  external: true
   name: expense-app-secret
   type: Opaque
 
@@ -61,6 +59,8 @@ mongodb:
   livenessProbe:
     enabled: false
   nameOverride: mongodb
+  containerPort:
+    mongodb: 27017
   service:
     name: mongodb-headless
   architecture: replicaset
@@ -76,6 +76,7 @@ mongodb:
     enabled: false
   auth:
     enabled: true
+    existingSecret: ""
     rootPassword: root
     rootUser: matan
 
