@@ -24,7 +24,7 @@ def test_post_request_expense1(address):
     response = post(f'{address}/expenses', json=expenses[0])
     assert response.status_code == 201
     response_data = response.json()
-    expenses[0]['id'] = response_data['_id']
+    expenses[0]['id'] = response_data['id']
     assert response_data['product'] == expenses[0]['product']
     assert response_data['price'] == expenses[0]['price']
 
@@ -32,7 +32,7 @@ def test_post_request_expense2(address):
     response = post(f'{address}/expenses', json=expenses[1])
     assert response.status_code == 201
     response_data = response.json()
-    expenses[1]['id'] = response_data['_id']
+    expenses[1]['id'] = response_data['id']
     assert response_data['product'] == expenses[1]['product']
     assert response_data['price'] == expenses[1]['price']
 
