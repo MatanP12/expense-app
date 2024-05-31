@@ -16,6 +16,7 @@ pipeline {
         ECR_REGISTRY="644435390668.dkr.ecr.ap-south-1.amazonaws.com/matan-protfolio"
         AWS_DEFAULT_REGION="ap-south-1"
         APP_IMAGE_NAME="expense_app-app"
+
     }
 
 	stages {
@@ -98,11 +99,9 @@ pipeline {
                     # run the test container
                     docker run --network=test_network --rm --name e2e_test e2e_tests
                     # get the exit code of docker run(0=tests passed other=tests failed)
-                    test_exit_code=$?
                     # disconect the proxy server from the network and delete it
                     docker network disconnect test_network expense_app-proxy-1
                     docker network rm test_network
-                    exit $test_exit_code                
                 '''
                 sh "docker-compose down"
             }
@@ -125,7 +124,7 @@ pipeline {
             }
 		}	
         
-        stage('Add new tag'){
+        stage('Add new to git tag'){
             when {
                 expression {
                     return BRANCH_NAME == "main"
@@ -137,7 +136,28 @@ pipeline {
                     sh """git push origin ${RELEASE_TAG}"""
                 }
             }        
-        }            
+        }          
+
+        stage('Publish tag to Deployment'){
+            when {
+                expression {
+                    return BRANCH_NAME == "main"
+                }
+            }
+            steps {
+                sshagent(credentials: ['84a90b8c-8d65-4b26-9197-4cccb29c67a3']) {
+                    withCredentials([string(credentialsId:'244629c4-47e5-46fa-ba4a-fa710688d80c', variable: 'repo')]){
+                        sh """git clone ${repo}"""
+                    }
+                }
+
+                sh '''
+                    cd expense-app-gitops
+                    sed -i 's/appVersion: "[0-9]\+\.[0-9]\+\.[0-9]\+"/appVersion: "${RELEASE_TAG}"/' Chart.yaml 
+                '''
+            }        
+        }
+
     }
 
     post {
