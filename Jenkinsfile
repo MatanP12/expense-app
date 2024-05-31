@@ -59,7 +59,12 @@ pipeline {
 
         stage('Unit tests'){
             steps {
-		        sh "./unit_tests/tests.sh"
+		        sh '''#!/bin/bash
+                    docker build --tag unit_tests:latests ./unit_tests
+                    docker run --rm --name unit_test unit_tests:latests
+                    test_exit_code=$?
+                    exit $test_exit_code                
+                '''
             }
         }
 
@@ -80,10 +85,22 @@ pipeline {
             }            
             steps {
 		        echo "Do e2e tests"
-                sh '''
-                    docker-compose up -d
+                sh "docker-compose up -d"
+		        sh '''#!/bin/bash
+                    # Build e2e tests image
+                    docker build --tag e2e_tests ./e2e_tests
+                    # create a network and connect the proxy server
+                    docker network create test_network
+                    docker network connect test_network expense_app-proxy-1
+                    # run the test container
+                    docker run --network=test_network --rm --name e2e_test e2e_tests
+                    # get the exit code of docker run(0=tests passed other=tests failed)
+                    test_exit_code=$?
+                    # disconect the proxy server from the network and delete it
+                    docker network disconnect test_network expense_app-proxy-1
+                    docker network rm test_network
+                    exit $test_exit_code                
                 '''
-		        sh "./e2e_tests/tests.sh"
                 sh "docker-compose down"
             }
         }
@@ -122,6 +139,8 @@ pipeline {
 
     post {
 		always {
+            sh 'docker network disconnect test_network expense_app-proxy-1 | true'
+            sh 'docker network rm test_network | true'
             sh 'docker compose down -v | true'
             cleanWs()
 		}
