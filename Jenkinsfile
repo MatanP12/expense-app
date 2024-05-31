@@ -120,6 +120,16 @@ pipeline {
 
             }
 		}	
+
+        stage('Upload static files to S3'){
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
+                    sh "aws s3 --recursive cp src/templates s3://matan-bucket/static"
+                    sh "aws s3 --recursive cp nginx/ s3://matan-bucket/nginx"
+                }
+
+            }
+        }
         
         stage('Publish tag to Deployment'){
             when {
