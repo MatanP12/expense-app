@@ -6,7 +6,7 @@ import pytest
 
 @pytest.fixture()
 def address():
-    return 'http://expense_app-app-1:5000'
+    return 'http://expense_app-proxy-1:80'
 
 expenses = [
     {
