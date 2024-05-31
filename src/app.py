@@ -20,12 +20,15 @@ app.logger.addHandler(get_json_handler())
 app.logger.setLevel(logging.INFO)
 
 def parser(expense):
-    expense['_id'] = str(expense['_id'])
-    return expense
+    return {
+        "product" : expense['product'],
+        "price" : expense['price'],
+        "id" : str(expense['_id'])
+    }
 
 @app.route("/")
 def home():
-    return "I am ok!", 200
+    return "i am ok!", 200
 
 @app.route("/metrics")
 def metrics():
@@ -70,7 +73,7 @@ def delete_expense(id):
         update_fields = {}
         if 'product' in data:
             update_fields['product'] = data['product']
-        if 'price' in data:
+        if 'price' in data :
             update_fields['price'] = float(data['price'])
         try:
             result = expenses_collection.update_one(

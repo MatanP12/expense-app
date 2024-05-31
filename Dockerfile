@@ -7,4 +7,5 @@ RUN ["pip", "install","-r","requirments.txt"]
 
 COPY ./src .
 
+
 ENTRYPOINT [ "python","app.py" ]

@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - mongo_db
-    ports:
-      - "5000:5000"
+    # ports:
+    #   - "5000:5000"
     environment:
       MONGODB_HOST: mongo_db
       MONGODB_PORT: 27017
@@ -15,7 +15,18 @@ services:
       DEBUG_MODE: false
     networks:
       - application_network
-    
+      - proxy_network
+  proxy:
+    image: nginx:stable-alpine3.19
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+    networks:
+      - proxy_network
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d/:ro
+      - ./src/templates:/usr/share/nginx/static:ro
   mongo_db:
     image: mongo:4.4.29
     environment:
@@ -24,6 +35,6 @@ services:
     networks:
       - application_network
     command: --quiet
-  
 networks:
   application_network:
+  proxy_network:
