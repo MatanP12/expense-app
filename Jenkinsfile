@@ -122,6 +122,7 @@ pipeline {
 
     post {
 		always {
+            sh 'docker compose down -v | true'
             cleanWs()
 		}
         success {
