@@ -139,9 +139,9 @@ pipeline {
 
     post {
 		always {
-            sh 'docker network disconnect test_network expense_app-proxy-1 | true'
-            sh 'docker network rm test_network | true'
-            sh 'docker compose down -v | true'
+            sh 'docker network disconnect test_network expense_app-proxy-1 || true'
+            sh 'docker network rm test_network || true'
+            sh 'docker compose down -v || true'
             cleanWs()
 		}
         success {
