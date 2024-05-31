@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+        }
+        input[type="text"], button {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .expense-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Added */
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .expense-item input[type="text"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Expense Tracker</h1>
+
+        <div class="expense-form">
+            <h2>Add Expense</h2>
+            <form id="expenseForm">
+                <label for="product">Product:</label>
+                <input type="text" id="product" name="product" required>
+                <label for="price">Price:</label>
+                <input type="text" id="price" name="price" required>
+                <button type="submit">Add Expense</button>
+            </form>
+        </div>
+
+        <div class="expense-list">
+            <h2>Expenses</h2>
+            <ul id="expenses">
+                <!-- Expenses will be listed here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('expenseForm');
+        const expensesList = document.getElementById('expenses');
+
+        // Fetch expenses from the server
+        async function fetchExpenses() {
+            try {
+                const response = await fetch('/expenses');
+                const data = await response.json();
+                renderExpenses(data);
+            } catch (error) {
+                console.error('Error fetching expenses:', error);
+            }
+        }
+
+        // Function to render expenses
+        function renderExpenses(expenses) {
+            expensesList.innerHTML = '';
+            expenses.forEach((expense) => {
+                const li = document.createElement('li');
+                li.className = 'expense-item';
+                li.innerHTML = `
+                    <input type="text" value="${expense.product}" data-id="${expense.id}" class="product-input">
+                    <input type="text" value="${expense.price}" data-id="${expense.id}" class="price-input">
+                    <button onclick="updateExpense('${expense.id}')">Update</button>
+                    <span style="margin-right: 5px;"></span> <!-- Added space -->
+                    <button onclick="deleteExpense('${expense.id}')">Delete</button>
+                `;
+                expensesList.appendChild(li);
+            });
+        }
+
+        // Function to add an expense
+        async function addExpense(product, price) {
+            try {
+                const response = await fetch('/expenses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ product, price }),
+                });
+
+                if (response.ok) {
+                    fetchExpenses();
+                } else {
+                    console.error('Error adding expense:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error adding expense:', error);
+            }
+        }
+
+        // Function to update an expense
+        async function updateExpense(id) {
+            const productInput = document.querySelector(`.product-input[data-id="${id}"]`);
+            const priceInput = document.querySelector(`.price-input[data-id="${id}"]`);
+
+            const updatedProduct = productInput.value;
+            const updatedPrice = parseFloat(priceInput.value);
+
+            if (isNaN(updatedPrice)) {
+                alert('Price must be a valid number');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/expenses/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ product: updatedProduct, price: updatedPrice }),
+                });
+
+                if (response.ok) {
+                    fetchExpenses();
+                } else {
+                    console.error('Error updating expense:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error updating expense:', error);
+            }
+        }
+
+        // Function to delete an expense
+        async function deleteExpense(id) {
+            try {
+                const response = await fetch(`/expenses/${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.ok) {
+                    fetchExpenses();
+                } else {
+                    console.error('Error deleting expense:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error deleting expense:', error);
+            }
+        }
+
+        // Form submit event listener
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const product = document.getElementById('product').value;
+            const price = parseFloat(document.getElementById('price').value);
+
+            if (isNaN(price)) {
+                alert('Price must be a valid number');
+                return;
+            }
+
+            await addExpense(product, price);
+
+            // Clear form inputs
+            form.reset();
+        });
+
+        // Initial fetch of expenses
+        fetchExpenses();
+    </script>
+</body>
+</html>

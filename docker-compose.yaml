@@ -17,16 +17,25 @@ services:
       - application_network
       - proxy_network
   proxy:
-    image: nginx:stable-alpine3.19
+    build:
+      dockerfile: Dockerfile.nginx
     depends_on:
       - app
     ports:
       - "80:80"
     networks:
       - proxy_network
-    volumes:
-      - ./nginx/:/etc/nginx/conf.d/:ro
-      - ./src/templates:/usr/share/nginx/static:ro
+  # proxy:
+  #   image: nginx:stable-alpine3.19
+  #   depends_on:
+  #     - app
+  #   ports:
+  #     - "80:80"
+  #   networks:
+  #     - proxy_network
+  #   volumes:
+  #     - ./nginx/:/etc/nginx/conf.d/:ro
+  #     - ./src/templates:/usr/share/nginx/static:ro
   mongo_db:
     image: mongo:4.4.29
     environment:

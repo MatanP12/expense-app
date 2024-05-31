@@ -7,4 +7,3 @@ RUN ["pip", "install","-r","requirments.txt"]
 COPY test_.py .
 
 ENTRYPOINT [ "pytest","-v"]
-# CMD [ "localhost:5000" ]
