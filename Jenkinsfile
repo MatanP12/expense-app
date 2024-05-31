@@ -124,20 +124,6 @@ pipeline {
             }
 		}	
         
-        stage('Add new to git tag'){
-            when {
-                expression {
-                    return BRANCH_NAME == "main"
-                }
-            }
-            steps {
-                sshagent(credentials: ['0c049907-e9ed-49b8-a0ab-496edbf082b9']) {
-                    sh """git tag ${RELEASE_TAG}"""
-                    sh """git push origin ${RELEASE_TAG}"""
-                }
-            }        
-        }          
-
         stage('Publish tag to Deployment'){
             when {
                 expression {
@@ -158,6 +144,20 @@ pipeline {
 
             }        
         }
+        
+        stage('Add new to git tag'){
+            when {
+                expression {
+                    return BRANCH_NAME == "main"
+                }
+            }
+            steps {
+                sshagent(credentials: ['0c049907-e9ed-49b8-a0ab-496edbf082b9']) {
+                    sh """git tag ${RELEASE_TAG}"""
+                    sh """git push origin ${RELEASE_TAG}"""
+                }
+            }        
+        }          
 
     }
 
