@@ -61,8 +61,6 @@ pipeline {
             }
         }        
 
-
-
         stage('Unit tests'){
             steps {
 		        sh '''#!/bin/bash
@@ -107,7 +105,6 @@ pipeline {
             }
         }
 
-
 		stage('Push expense app image to registry'){
             when {
                 expression {
@@ -137,14 +134,14 @@ pipeline {
                     }
                     sh '''
                         cd expense-app-gitops
-                        sed -i 's/appVersion: "[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+"/appVersion: "\${RELEASE_TAG}"/' Chart.yaml 
-                        git commit -m "Pipeline Update to version \${RELEASE_TAG}"
+                        sed -i 's/appVersion: "[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+"/appVersion: '\"${RELEASE_TAG}\"'/' Chart.yaml 
+                        git commit -am "Pipeline Update to version \'${RELEASE_TAG}\'"
                     '''
                 }
 
             }        
         }
-        
+
         stage('Add new to git tag'){
             when {
                 expression {
