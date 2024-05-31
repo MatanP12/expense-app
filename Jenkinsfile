@@ -134,14 +134,14 @@ pipeline {
                     }
                     sh '''
                         cd expense-app-gitops
-                        sed -i 's/appVersion: "[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+"/appVersion: \"'''+RELEASE_TAG+'''\"/' Chart.yaml 
+                        sed -i 's/appVersion: "[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+"/appVersion: '''+RELEASE_TAG+'''/' Chart.yaml 
                         git commit -am "Pipeline Update to version '''+RELEASE_TAG+'''"
                         git push origin main
                     '''                 
                 }
             }        
         }
-
+        
         stage('Add new to git tag'){
             when {
                 expression {
