@@ -149,12 +149,13 @@ pipeline {
                     withCredentials([string(credentialsId:'244629c4-47e5-46fa-ba4a-fa710688d80c', variable: 'repo')]){
                         sh """git clone ${repo}"""
                     }
+                    sh '''
+                        cd expense-app-gitops
+                        sed -i 's/appVersion: "[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+"/appVersion: "\${RELEASE_TAG}"/' Chart.yaml 
+                        git commit -m "Pipeline Update to version \${RELEASE_TAG}"
+                    '''
                 }
 
-                sh '''
-                    cd expense-app-gitops
-                    sed -i 's/appVersion: "[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+"/appVersion: "${RELEASE_TAG}"/' Chart.yaml 
-                '''
             }        
         }
 
