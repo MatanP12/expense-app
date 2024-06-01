@@ -61,6 +61,37 @@
             flex: 1;
             margin-right: 10px;
         }
+        /* Snackbar styles */
+        .snackbar {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            transform: translateX(-50%);
+        }
+
+        .snackbar.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
     </style>
 </head>
 <body>
@@ -86,9 +117,22 @@
         </div>
     </div>
 
+    <!-- Snackbar -->
+    <div id="snackbar"></div>
+
     <script>
         const form = document.getElementById('expenseForm');
         const expensesList = document.getElementById('expenses');
+        const snackbar = document.getElementById('snackbar');
+
+        // Function to show snackbar
+        function showSnackbar(message) {
+            snackbar.innerText = message;
+            snackbar.className = "snackbar show";
+            setTimeout(() => {
+                snackbar.className = snackbar.className.replace("show", "");
+            }, 3000);
+        }
 
         // Fetch expenses from the server
         async function fetchExpenses() {
@@ -130,6 +174,7 @@
                 });
 
                 if (response.ok) {
+                    showSnackbar("Expense created successfully");
                     fetchExpenses();
                 } else {
                     console.error('Error adding expense:', response.statusText);
@@ -148,7 +193,7 @@
             const updatedPrice = parseFloat(priceInput.value);
 
             if (isNaN(updatedPrice)) {
-                alert('Price must be a valid number');
+                showSnackbar('Price must be a valid number');
                 return;
             }
 
@@ -162,6 +207,7 @@
                 });
 
                 if (response.ok) {
+                    showSnackbar("Expense updated successfully");
                     fetchExpenses();
                 } else {
                     console.error('Error updating expense:', response.statusText);
@@ -179,6 +225,7 @@
                 });
 
                 if (response.ok) {
+                    showSnackbar("Expense deleted successfully");
                     fetchExpenses();
                 } else {
                     console.error('Error deleting expense:', response.statusText);
@@ -195,7 +242,7 @@
             const price = parseFloat(document.getElementById('price').value);
 
             if (isNaN(price)) {
-                alert('Price must be a valid number');
+                showSnackbar('Price must be a valid number');
                 return;
             }
 

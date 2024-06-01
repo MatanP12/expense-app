@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from pymongo import MongoClient
 import os
 import logging
@@ -27,7 +27,7 @@ def parser(expense):
 
 @app.route("/")
 def home():
-    return "i am ok!", 200
+    return render_template("index.html")
 
 @app.route("/metrics")
 def metrics():
