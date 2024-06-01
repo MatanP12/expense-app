@@ -10,9 +10,8 @@ app = Flask(__name__)
 mongo_username = os.getenv('MONGODB_USERNAME', 'root')
 mongo_password = os.getenv('MONGODB_PASSWORD','example')
 mongo_host = os.getenv('MONGODB_HOST', 'localhost')
-mongo_port = os.getenv('MONGODB_PORT','27017')
 
-client = MongoClient(f'mongodb://{mongo_username}:{mongo_password}@{mongo_host}:{mongo_port}')
+client = MongoClient(f'mongodb://{mongo_username}:{mongo_password}@{mongo_host}')
 db = client['expense_tracker']
 expenses_collection = db['expenses']
 
