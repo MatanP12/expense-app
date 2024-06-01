@@ -12,7 +12,7 @@ mongo_password = os.getenv('MONGODB_PASSWORD','example')
 mongo_host = os.getenv('MONGODB_HOST', 'localhost')
 
 client = MongoClient(f'mongodb://{mongo_username}:{mongo_password}@{mongo_host}')
-db = client['expense_tracker']
+db = client['expenses']
 expenses_collection = db['expenses']
 
 app.logger.addHandler(get_json_handler())
