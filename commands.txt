@@ -1,8 +1,0 @@
-python -m venv .venv
-
-source .venv/bin/activate
-
-docker build --tag my_app:latest .
-
-docker run --rm --name c1 -p 5000:5000 my_app:latest
-

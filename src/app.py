@@ -14,9 +14,14 @@ mongo_host = os.getenv('MONGODB_HOST', 'localhost')
 client = MongoClient(f'mongodb://{mongo_username}:{mongo_password}@{mongo_host}')
 db = client['expenses']
 expenses_collection = db['expenses']
-
-app.logger.addHandler(get_json_handler())
+json_handler= get_json_handler()
+app.logger.addHandler(json_handler)
 app.logger.setLevel(logging.INFO)
+
+# werkzeug_logger = logging.getLogger('werkzeug')
+# werkzeug_logger.handlers.clear()
+# werkzeug_logger.addHandler(json_handler)
+
 
 def parser(expense):
     return {

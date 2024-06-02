@@ -21,7 +21,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     networks:
       - application_network
-    command: --quiet
+    command: mongod --quiet --logpath /dev/null
   proxy:
     build:
       dockerfile: Dockerfile.nginx
