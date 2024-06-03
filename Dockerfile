@@ -5,6 +5,6 @@ WORKDIR /app
 COPY ./requirments.txt .
 RUN ["pip", "install","-r","requirments.txt"]
 
-COPY ./src .
+COPY ./src/app.py .
 
 ENTRYPOINT [ "python","app.py" ]

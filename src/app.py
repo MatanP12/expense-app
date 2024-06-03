@@ -3,9 +3,8 @@ from pymongo import MongoClient
 import os
 import logging 
 from logging.handlers import RotatingFileHandler
-from json_formatter import get_json_handler
 from bson import ObjectId
-
+from prometheus_flask_exporter import PrometheusMetrics
 app = Flask(__name__)
 
 mongo_username = os.getenv('MONGODB_USERNAME', 'root')
@@ -26,6 +25,9 @@ file_handler.setFormatter(formatter)
 app.logger.addHandler(file_handler)
 app.logger.setLevel(logging.INFO)
 
+metrics = PrometheusMetrics(app)
+metrics.info('app_info','Application info')
+
 
 @app.before_request
 def log_request_info():
@@ -39,8 +41,6 @@ def log_response_info(response):
 
 
 
-
-
 def parser(expense):
     return {
         "product" : expense['product'],
@@ -51,10 +51,6 @@ def parser(expense):
 @app.route("/")
 def home():
     return render_template("index.html")
-
-@app.route("/metrics")
-def metrics():
-    pass # todo
 
 @app.route("/expenses", methods=['POST','GET'])
 def get_expenses_route():
