@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify, render_template
 from pymongo import MongoClient
 import os
-import logging
+import logging 
+from logging.handlers import RotatingFileHandler
 from json_formatter import get_json_handler
 from bson import ObjectId
 
@@ -14,13 +15,30 @@ mongo_host = os.getenv('MONGODB_HOST', 'localhost')
 client = MongoClient(f'mongodb://{mongo_username}:{mongo_password}@{mongo_host}')
 db = client['expenses']
 expenses_collection = db['expenses']
-json_handler= get_json_handler()
-app.logger.addHandler(json_handler)
+
+file_handler = RotatingFileHandler('app.log', maxBytes=10240, backupCount=10)
+file_handler.setLevel(logging.INFO)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+file_handler.setFormatter(formatter)
+
+app.logger.addHandler(file_handler)
 app.logger.setLevel(logging.INFO)
 
-# werkzeug_logger = logging.getLogger('werkzeug')
-# werkzeug_logger.handlers.clear()
-# werkzeug_logger.addHandler(json_handler)
+
+@app.before_request
+def log_request_info():
+    app.logger.info('Request: %s %s %s', request.method, request.path, request.data)
+
+    
+@app.after_request
+def log_response_info(response):
+    app.logger.info('Response: %s %s', response.status, response.data)
+    return response
+
+
+
 
 
 def parser(expense):
@@ -50,13 +68,12 @@ def get_expenses_route():
         }
         result = expenses_collection.insert_one(new_expense)
         new_expense = expenses_collection.find_one({'_id': result.inserted_id})
-        app.logger.info('Expense added', extra={'request': request, 'log_details': new_expense})
-
+        # app.logger.info('Expense added', extra={'request': request, 'log_details': new_expense})
         return jsonify(parser(new_expense)), 201
     if request.method == "GET":
         expenses = list(expenses_collection.find({}))
         expenses = list(map(parser, expenses))
-        app.logger.info('Fetched expenses', extra={'request': request, 'log_details': expenses})
+        # app.logger.info('Fetched expenses', extra={'request': request, 'log_details': expenses})
         return jsonify(expenses), 200
 
 
@@ -67,12 +84,12 @@ def delete_expense(id):
         if result.deleted_count == 0:
             app.logger.warning('Expense not found', extra={'request': request, 'log_details': id})
             return jsonify({'error': f'Expense with id {id} not found'}), 404
-        app.logger.info('Expense deleted', extra={'request': request, 'log_details': id})
+        # app.logger.info('Expense deleted', extra={'request': request, 'log_details': id})
         return jsonify({'message': 'Expense deleted successfully'}), 200
     if request.method == "PUT":
         data = request.json
         if 'product' not in data and 'price' not in data:
-            app.logger.warning('No fields to update', extra={'request': request})
+            # app.logger.warning('No fields to update', extra={'request': request})
             return jsonify({'error': 'Product or price is required to update'}), 400
         update_fields = {}
         if 'product' in data:
@@ -85,21 +102,21 @@ def delete_expense(id):
                 {'$set': update_fields}
             )
             if result.matched_count == 0:
-                app.logger.warning('Expense not found', extra={'request': request, 'log_details': id})
+                # app.logger.warning('Expense not found', extra={'request': request, 'log_details': id})
                 return jsonify({'error': 'Expense not found'}), 404  
             updated_expense = expenses_collection.find_one({'_id': ObjectId(id)})
-            app.logger.info('Expense updated', extra={'request': request, 'log_details': updated_expense})
+            # app.logger.info('Expense updated', extra={'request': request, 'log_details': updated_expense})
             return jsonify(parser(updated_expense)), 200
         except Exception as e:
-            app.logger.error('Invalid expense ID', extra={'request': request, 'log_details': str(e)})
+            # app.logger.error('Invalid expense ID', extra={'request': request, 'log_details': str(e)})
             return jsonify({'error': 'Invalid expense ID', 'message':f'{e}'}), 400
     if request.method == "GET":
         try:
             expense = expenses_collection.find_one({'_id': ObjectId(id)})
-            app.logger.info('Expense recieved', extra={'request': request, 'log_details': expense})
+            # app.logger.info('Expense recieved', extra={'request': request, 'log_details': expense})
             return jsonify(parser(expense)), 200
         except Exception as e:
-            app.logger.error('Invalid expense ID', extra={'request': request, 'log_details': str(e)})
+            # app.logger.error('Invalid expense ID', extra={'request': request, 'log_details': str(e)})
             return jsonify({'error': 'Invalid expense ID'}), 400
 
 if __name__ == "__main__":
