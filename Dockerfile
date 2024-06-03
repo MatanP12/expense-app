@@ -6,5 +6,6 @@ COPY ./requirments.txt .
 RUN ["pip", "install","-r","requirments.txt"]
 
 COPY ./src/app.py .
+COPY ./src/templates ./templates
 
 ENTRYPOINT [ "python","app.py" ]

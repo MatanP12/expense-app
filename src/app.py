@@ -40,7 +40,6 @@ def log_response_info(response):
     return response
 
 
-
 def parser(expense):
     return {
         "product" : expense['product'],
