@@ -33,7 +33,7 @@ pipeline {
         stage('Unit tests'){
             steps {
 		        sh '''#!/bin/bash
-                    docker build --tag unit_tests:latests ./unit_tests
+                    docker build --tag unit_tests:latest ./unit_tests
                     docker network create test_network
                     docker run -d --rm --name server --network=test_network expense_app-app:latest
                     docker run --rm --name unit_test --network=test_network unit_tests:latest
