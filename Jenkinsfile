@@ -22,8 +22,6 @@ pipeline {
 	stages {
 
         stage('build'){
-            
-            
             steps {
                 sh "docker-compose build"
 
@@ -99,9 +97,9 @@ pipeline {
             }            
             steps{
                 sh """docker tag ${APP_IMAGE_NAME}:latest ${ECR_REGISTRY}:${RELEASE_TAG}"""
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
+                // withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
                     sh """aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"""
-                }
+                // }
                 sh """docker push ${ECR_REGISTRY}:${RELEASE_TAG}"""
 
             }
@@ -109,10 +107,10 @@ pipeline {
 
         stage('Upload static files to S3'){
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
+                // withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
                     sh "aws s3 --recursive cp src/templates s3://matan-bucket/static"
                     sh "aws s3 --recursive cp nginx/ s3://matan-bucket/nginx"
-                }
+                // }
 
             }
         }
