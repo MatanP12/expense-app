@@ -35,6 +35,7 @@ pipeline {
                     docker network create test_network
                     docker run -d --rm --name server --network=test_network expense_app-app:latest
                     docker run --rm --name unit_test --network=test_network unit_tests:latest
+                    docker rm -f server
                     docker network disconnect test_network server
                 '''
             }
@@ -98,7 +99,7 @@ pipeline {
             steps{
                 sh """docker tag ${APP_IMAGE_NAME}:latest ${ECR_REGISTRY}:${RELEASE_TAG}"""
                 // withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'b4499036-3a99-44a4-a946-9c2ef50b8387']]) {
-                    sh """aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"""
+                    // sh """aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"""
                 // }
                 sh """docker push ${ECR_REGISTRY}:${RELEASE_TAG}"""
 
