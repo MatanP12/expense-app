@@ -35,8 +35,8 @@ pipeline {
                     docker network create test_network
                     docker run -d --rm --name server --network=test_network expense_app-app:latest
                     docker run --rm --name unit_test --network=test_network unit_tests:latest
-                    docker rm -f server
                     docker network disconnect test_network server
+                    docker rm -f server
                 '''
             }
         }
