@@ -21,6 +21,43 @@ pipeline {
 
 	stages {
 
+        stage('build'){
+            
+            
+            steps {
+                sh "docker-compose build"
+
+            }
+        }        
+
+        stage('Unit tests'){
+            steps {
+		        sh '''#!/bin/bash
+                    docker build --tag unit_tests:latests ./unit_tests
+                    docker network create test_network
+                    docker run -d --rm --name server --network=test_network expense_app-app:latest
+                    docker run --rm --name unit_test --network=test_network unit_tests:latest
+                    docker network disconnect test_server server
+                '''
+            }
+        }
+
+        stage('E2E tests'){
+            steps {
+                sh "docker-compose up -d"
+		        sh '''#!/bin/bash
+                    # Build e2e tests image
+                    docker build --tag e2e_tests ./e2e_tests
+                    # create a network and connect the proxy server
+                    docker network connect test_network expense_app-proxy-1
+                    # run the test container
+                    docker run --network=test_network --rm --name e2e_test e2e_tests
+                    docker network disconnect test_network expense_app-proxy-1
+                '''
+                sh "docker-compose down"
+            }
+        }
+
 
 		stage('Fetch tag from remote repository'){
             when {
@@ -53,57 +90,6 @@ pipeline {
 				}
 			}
 		}
-
-
-        stage('build'){
-            steps {
-                echo "Here suppose to be a build, but we are using python"
-            }
-        }        
-
-        stage('Unit tests'){
-            steps {
-		        sh '''#!/bin/bash
-                    docker build --tag unit_tests:latests ./unit_tests
-                    docker run --rm --name unit_test unit_tests:latests
-                '''
-            }
-        }
-
-		stage('Package'){
-		    steps {
-		        echo "Create image"
-		        sh '''
-                    docker-compose build
-                    '''
-		    }
-		}
-		
-        stage('E2E tests'){
-            when {
-                expression {
-                    return BRANCH_NAME.startsWith("feature/") || BRANCH_NAME == "main"
-                }
-            }            
-            steps {
-		        echo "Do e2e tests"
-                sh "docker-compose up -d"
-		        sh '''#!/bin/bash
-                    # Build e2e tests image
-                    docker build --tag e2e_tests ./e2e_tests
-                    # create a network and connect the proxy server
-                    docker network create test_network
-                    docker network connect test_network expense_app-proxy-1
-                    # run the test container
-                    docker run --network=test_network --rm --name e2e_test e2e_tests
-                    # get the exit code of docker run(0=tests passed other=tests failed)
-                    # disconect the proxy server from the network and delete it
-                    docker network disconnect test_network expense_app-proxy-1
-                    docker network rm test_network
-                '''
-                sh "docker-compose down"
-            }
-        }
 
 		stage('Push expense app image to registry'){
             when {
@@ -142,12 +128,13 @@ pipeline {
                     withCredentials([string(credentialsId:'244629c4-47e5-46fa-ba4a-fa710688d80c', variable: 'repo')]){
                         sh """git clone ${repo}"""
                     }
-                    sh '''
-                        cd expense-app-gitops
-                        sed -i 's/appVersion: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+/appVersion: '''+RELEASE_TAG+'''/' Chart.yaml 
-                        git commit -am "Pipeline Update to version '''+RELEASE_TAG+'''"
-                        git push origin main
-                    '''                 
+                    dir('expense-app-gitops') {
+                        sh '''
+                            sed -i 's/appVersion: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+/appVersion: '''+RELEASE_TAG+'''/' Chart.yaml 
+                            git commit -am "Pipeline Update to version '''+RELEASE_TAG+'''"
+                            git push origin main
+                        '''                 
+                    }
                 }
             }        
         }   

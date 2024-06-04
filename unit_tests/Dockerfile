@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY ./requirments.txt .
 RUN ["pip", "install","-r","requirments.txt"]
-COPY test_app.py .
+COPY test_.py .
 
 ENTRYPOINT [ "pytest","-v"]
