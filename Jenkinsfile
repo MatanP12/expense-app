@@ -107,7 +107,6 @@ pipeline {
             steps {
                     sh "aws s3 --recursive cp src/templates s3://matan-bucket/static"
                     sh "aws s3 --recursive cp nginx/ s3://matan-bucket/nginx"
-                // }
 
             }
         }
