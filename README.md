@@ -52,13 +52,13 @@ Or use docker to run the application
 
 #### Get all expenses
 
-```http
+```
   GET /expenses
 ```
 
 #### Create new expense
 
-```http
+```
   POST /expenses
 ```
 ##### Request Body:
@@ -71,7 +71,7 @@ Or use docker to run the application
 
 #### Get expense
 
-```http
+```
   GET /expenses/${id}
 ```
 
@@ -82,7 +82,7 @@ Or use docker to run the application
 
 #### Update expense
 
-```http
+```
   PUT /expenses/${id}
 ```
 
@@ -100,7 +100,7 @@ Or use docker to run the application
 
 #### Delete expense
 
-```http
+```
   DELETE /expenses/${id}
 ```
 
@@ -109,7 +109,7 @@ Or use docker to run the application
 | `id`      | `string` | **Required**. Id of expense to delete |
 
 
-## 3 Teir application
+## 3 Tier application
 
 ![3-Tier application Drawing](https://github.com/MatanP12/expense-app/blob/main/Documents/Expense-app-Application.png?raw=true)
 
