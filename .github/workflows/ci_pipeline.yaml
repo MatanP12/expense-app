@@ -8,4 +8,4 @@ jobs:
     steps:
       - name: Install Docker
         run: |
-          docker run -rm hello-world
+          docker run --rm hello-world
