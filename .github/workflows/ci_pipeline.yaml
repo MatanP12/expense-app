@@ -17,5 +17,12 @@ jobs:
         run: |
           docker run -d --rm --name server -p 5000:5000 expense_app-app:latest          
           pip install -r ./unit_tests/requirments.txt
-          pytest -v ././unit_tests/test_.py
+          pytest -v ./unit_tests/test_.py
           docker rm -f server
+      
+      - name: E2E tests
+        run: |
+          docker compose up -d
+          pytest -v ./e2e_tests/test_.py
+          docker conpose down -v
+        
