@@ -1,0 +1,11 @@
+name: CI\CD pipeline
+
+on: [push]
+
+jobs:
+  CI-CD-Pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Docker
+        run: |
+          docker run -rm hello-world
