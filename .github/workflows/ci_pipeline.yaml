@@ -15,7 +15,7 @@ jobs:
 
       - name: Unit tests
         run: |
+          docker run -d --rm --name server -p 5000:5000 expense_app-app:latest          
           pip install -r ./unit_tests/requirments.txt
           pytest -v ././unit_tests/test_.py
-
-        
+          docker rm -f server
