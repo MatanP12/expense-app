@@ -6,9 +6,13 @@ jobs:
   CI-CD-Pipeline:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4
-
+      
+      - name: Install requirments for tests
+        run: |
+          pip install -r ./unit_tests/requirments.txt
+ 
       - name: Build image
         run: |
           docker compose build
@@ -16,7 +20,6 @@ jobs:
       - name: Unit tests
         run: |
           docker run -d --rm --name server -p 5000:5000 expense_app-app:latest          
-          pip install -r ./unit_tests/requirments.txt
           pytest -v ./unit_tests/test_.py
           docker rm -f server
       
