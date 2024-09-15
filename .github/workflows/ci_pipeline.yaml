@@ -16,6 +16,6 @@ jobs:
       - name: Unit tests
         run: |
           pip install -r ./unit_tests/requirments.txt
-          pytests -v ././unit_tests/test_.py
-      
+          pytest -v ././unit_tests/test_.py
+
         
