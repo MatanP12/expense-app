@@ -6,14 +6,16 @@ jobs:
   CI-CD-Pipeline:
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      
       - name: Build image
         run: |
-          docker-compose build
+          docker compose build
 
       - name: Unit tests
         run: |
           python --version
-          # docker run -d --rm --name server -p 5000:5000 expense_app-app:latest
           
 
         
