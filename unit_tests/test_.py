@@ -1,10 +1,12 @@
 import pytest
 from requests import get
-
+import os
 
 @pytest.fixture()
 def address():
-    return 'http://server:5000'
+    address = os.getenv("SERVER_ADDRESS", 'localhost')
+    port=os.getenv("SERVER_PORT", "5000")
+    return f'http://{address}:{port}'
 
 
 def test_sanity(address):

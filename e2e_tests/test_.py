@@ -6,7 +6,9 @@ import pytest
 
 @pytest.fixture()
 def address():
-    return 'http://expense_app-proxy-1:80'
+    address = os.getenv("SERVER_ADDRESS", 'localhost')
+    port=os.getenv("SERVER_PORT", "80")
+    return f'http://{address}:{port}'
 
 expenses = [
     {
