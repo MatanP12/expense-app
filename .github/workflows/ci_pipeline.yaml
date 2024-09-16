@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+        
       - name: Build image
         run: |
           docker compose build
@@ -50,8 +50,11 @@ jobs:
             echo "VERSION=$major.$minor.$patch" >> GITHUB_ENV
           fi
         
+          
       - name: Tag commit
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag $VERSION
           git push origin tag $VERSION
       
