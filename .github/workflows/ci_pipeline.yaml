@@ -2,21 +2,25 @@ name: CI\CD pipeline
 
 on: [push]
 
+
+
 jobs:
   CI-CD-Pipeline:
+    env:
+      VERSION: 1.0.0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Install requirments for tests
-        run: |
-          pip install -r ./unit_tests/requirments.txt
- 
       - name: Build image
         run: |
           docker compose build
 
+      - name: Install requirments for tests
+        run: |
+          pip install -r ./unit_tests/requirments.txt
+ 
       - name: Unit tests
         run: |
           docker run -d --rm --name server -p 5000:5000 expense_app-app:latest          
@@ -28,4 +32,28 @@ jobs:
           docker compose up -d
           pytest -v ./e2e_tests/test_.py
           docker conpose down -v
+      
+      - name: Calculate Release tag
+        run: |
+          git fetch --tags
+          tags=$(git tag -l --sort=-v:refname)
+          last_tag=$(echo $tags | cut -d ' ' -f 1)
+          if [ ! -z $last_tag ]; then
+            major=$(echo $last_tag | cut -d '.' -f 1)
+            minor=$(echo $last_tag | cut -d '.' -f 2)
+            patch=$(echo $last_tag | cut -d '.' -f 3)
+            let "patch = $patch + 1"
+            let "patch = $patch % 10"
+            if [ -z $patch ]; then
+              let minor++
+            fi
+            echo "VERSION=$major.$minor.$patch" >> GITHUB_ENV
+          fi
         
+      - name: Tag commit
+        run: |
+          git tag $VERSION
+          git push origin tag $VERSION
+      
+      
+      
