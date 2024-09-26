@@ -25,6 +25,8 @@ jobs:
   Test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Install requirments for tests
         run: |
           pip install -r ./unit_tests/requirments.txt
