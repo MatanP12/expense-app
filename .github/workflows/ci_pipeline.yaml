@@ -1,13 +1,18 @@
 name: CI\CD pipeline
 
-on: [push]
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v[0-9]+.[0-9].[0-9]+'
+  pull_request: 
+    types: [opened, reopened ]
 
 
 
 jobs:
-  CI-CD-Pipeline:
-    env:
-      VERSION: 1.0.0
+  Build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,10 +22,12 @@ jobs:
         run: |
           docker compose build
 
+  Test:
+    runs-on: ubuntu-latest
+    steps:
       - name: Install requirments for tests
         run: |
           pip install -r ./unit_tests/requirments.txt
- 
       - name: Unit tests
         run: |
           docker run -d --rm --name server -p 5000:5000 expense_app-app:latest          
@@ -32,31 +39,29 @@ jobs:
           docker compose up -d
           pytest -v ./e2e_tests/test_.py
           docker conpose down -v
-      
-      - name: Calculate Release tag
-        run: |
-          git fetch --tags
-          tags=$(git tag -l --sort=-v:refname)
-          last_tag=$(echo $tags | cut -d ' ' -f 1)
-          if [ ! -z $last_tag ]; then
-            major=$(echo $last_tag | cut -d '.' -f 1)
-            minor=$(echo $last_tag | cut -d '.' -f 2)
-            patch=$(echo $last_tag | cut -d '.' -f 3)
-            let "patch = $patch + 1"
-            let "patch = $patch % 10"
-            if [ -z $patch ]; then
-              let minor++
-            fi
-            echo "VERSION=$major.$minor.$patch" >> GITHUB_ENV
-          fi
 
-      - name: Tag commit
-        uses: actions/github-script@v7
+  Publish:
+    if: startsWith(github.ref, 'refs/tags/v')    
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker login
+        uses: docker/login-action@v3
         with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/$VERSION',
-              sha: context.sha
-            })
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{  secrets.GITHUB_TOKEN }}
+      
+      - name: Build image name
+        id: image
+        run: |
+          image_registry=${{ env.REGISTRY }}
+          image_name=$( echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          image_tag=
+          echo "name=$image_registry/$image_name/$image_tag" >> $GITHUB_OUTPUT 
+      
+      - name: Publish
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ steps.image.outputs.name }} 
+
