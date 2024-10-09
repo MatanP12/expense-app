@@ -51,8 +51,10 @@ jobs:
           image_tag=latest
           image_registry=${{ env.REGISTRY }}
           image_name=$( echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          if [[ "${{ github.ref_name }}" != "main" ]] && image_tag=${{ github.ref_name }}
-          # echo "name=${image_registry}/${image_name}/${image_tag}" >> $GITHUB_OUTPUT
+          if [[ "${{ github.ref_name }}" != "main" ]]; then
+            image_tag=${{ github.ref_name }}
+          fi
+          echo "name=$image_registry/$image_name/$image_tag" >> $GITHUB_OUTPUT
       
       - name: Push
         uses: docker/build-push-action@v6
