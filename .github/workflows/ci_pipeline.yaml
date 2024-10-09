@@ -2,8 +2,6 @@ name: CI\CD pipeline
 
 on:
   push:
-    branches:
-      - 'main'
     tags:
       - 'v[0-9]+.[0-9].[0-9]+'
   pull_request: 
@@ -12,38 +10,29 @@ on:
 
 
 jobs:
-  Build:
+  
+  BuildAndTest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
       - name: Build image
-        run: |
-          docker compose build
-
-  Test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        run: docker compose build
       - name: Install requirments for tests
         run: |
-          pip install -r ./unit_tests/requirments.txt
-      - name: Unit tests
-        run: |
-          docker run -d --rm --name server -p 5000:5000 expense_app-app:latest          
-          pytest -v ./unit_tests/test_.py
-          docker rm -f server
-      
+          pip install -r ./e2e_tests/requirments.txt
+        
       - name: E2E tests
         run: |
           docker compose up -d
+          sleep 10
           pytest -v ./e2e_tests/test_.py
           docker conpose down -v
 
   Publish:
-    if: startsWith(github.ref, 'refs/tags/v')    
+    if: | 
+      startsWith(github.ref, 'refs/tags/v') ||
+      github.ref_name == 'main'
     runs-on: ubuntu-latest
     steps:
       - name: Docker login
@@ -56,12 +45,13 @@ jobs:
       - name: Build image name
         id: image
         run: |
+          image_tag=latest
           image_registry=${{ env.REGISTRY }}
           image_name=$( echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          image_tag=
+          if [[ "${{ github.ref_name }}" != "main" ]] && image_tag=${{ github.ref_name }}
           echo "name=$image_registry/$image_name/$image_tag" >> $GITHUB_OUTPUT 
       
-      - name: Publish
+      - name: Push
         uses: docker/build-push-action@v6
         with:
           push: true
