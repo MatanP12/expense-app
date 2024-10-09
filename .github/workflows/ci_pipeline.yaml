@@ -36,6 +36,7 @@ jobs:
     if: | 
       startsWith(github.ref, 'refs/tags/v') ||
       github.ref_name == 'main'
+    needs: BuildAndTest
     runs-on: ubuntu-latest
     steps:
       - name: Docker login
@@ -46,6 +47,7 @@ jobs:
           password: ${{  secrets.GITHUB_TOKEN }}
       
       - name: Build image name
+      
         id: image
         run: |
           image_tag=latest
